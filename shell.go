@@ -669,7 +669,7 @@ func (s *Shell) BlockGet(path string) ([]byte, error) {
 	return ioutil.ReadAll(resp.Output)
 }
 
-func (s *Shell) BlockPut(block []byte) (string, error) {
+func (s *Shell) BlockPut(block []byte, options map[string]string) (string, error) {
 	data := bytes.NewReader(block)
 	rc := ioutil.NopCloser(data)
 	fr := files.NewReaderFile("", "", rc, nil)
@@ -678,6 +678,11 @@ func (s *Shell) BlockPut(block []byte) (string, error) {
 
 	req := s.newRequest(context.Background(), "block/put")
 	req.Body = fileReader
+	if options != nil {
+		for k, v := range options {
+			req.Opts[k] = v
+		}
+	}
 	resp, err := req.Send(s.httpcli)
 	if err != nil {
 		return "", err
